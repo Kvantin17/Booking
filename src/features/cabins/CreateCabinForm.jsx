@@ -33,7 +33,8 @@ const CreateCabinForm = () => {
   });
 
   const onSubmit = (data) => {
-    mutate(data);
+    // проследи чтоб названия данных из инпутов совпадали с переменными в БЕ
+    mutate({ ...data, image: data.image[0] });
   };
 
   const onError = (error) => {
@@ -123,7 +124,15 @@ const CreateCabinForm = () => {
         />
       </FormRow>
 
-      <FormRow label="Cabin photo"></FormRow>
+      <FormRow label="Cabin photo">
+        <FileInput
+          id="image"
+          accept="image/*"
+          {...register("image", {
+            required: "This field is required",
+          })}
+        />
+      </FormRow>
 
       <FormRow>
         <Button variation="secondary" type="reset">
