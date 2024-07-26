@@ -1,40 +1,49 @@
-import styled from "styled-components";
-
 import Input from "../../ui/Input";
 import Form from "../../ui/Form";
 import Button from "../../ui/Button";
 import FileInput from "../../ui/FileInput";
 import Textarea from "../../ui/Textarea";
-import { useForm } from "react-hook-form";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { createCabin } from "../../services/apiCabins";
-import toast from "react-hot-toast";
 import FormRow from "../../ui/FormRow";
+import { useForm } from "react-hook-form";
 
-const CreateCabinForm = () => {
-  const { register, handleSubmit, reset, getValues, formState } = useForm();
+import { useCreateCabin } from "./useCreateCabin";
+import { useEditCabin } from "./useEditCabin";
 
+const CreateCabinForm = ({ cabinToEdit = {} }) => {
+  // Добавление нового элемента
+  const { isCreating, createCabin } = useCreateCabin();
+  // Редактирование элемента
+  const { isEditing, editCabin } = useEditCabin();
+  const isWorking = isEditing || isCreating;
+
+  const { id: editId, ...editValues } = cabinToEdit;
+  const isEditSession = Boolean(editId);
+
+  // устанавливаем дефолтные значения смотря когда мы редактируем или создаем Cabin
+  const { register, handleSubmit, reset, getValues, formState } = useForm({
+    defaultValues: isEditSession ? editValues : {},
+  });
   // Ошибки которые срабатывают если введённые данные неудовлетворяют требуваниям из {...register}
   const { errors } = formState;
 
-  const queryClient = useQueryClient();
-
-  // Добавление нового элемента
-  const { mutate, isLoading: isCreating } = useMutation({
-    mutationFn: createCabin,
-    onSuccess: () => {
-      toast.success("New cabin succesfully created");
-      // новый запрос данных после добавления
-      queryClient.invalidateQueries({ queryKey: ["cabins"] });
-      // ресет формы
-      reset();
-    },
-    onError: (err) => toast.error(err.messages),
-  });
-
   const onSubmit = (data) => {
+    const image = typeof data.image === "string" ? data.image : data.image[0];
+
+    if (isEditSession)
+      editCabin(
+        { newCabinData: { ...data, image }, id: editId },
+        {
+          onSuccess: (data) => reset(),
+        }
+      );
     // проследи чтоб названия данных из инпутов совпадали с переменными в БЕ
-    mutate({ ...data, image: data.image[0] });
+    else
+      createCabin(
+        { ...data, image: data.image[0] },
+        {
+          onSuccess: (data) => reset(),
+        }
+      );
   };
 
   const onError = (error) => {
@@ -48,7 +57,7 @@ const CreateCabinForm = () => {
         <Input
           type="text"
           id="name"
-          disabled={isCreating}
+          disabled={isWorking}
           {...register("name", {
             required: "This field is required",
           })}
@@ -63,7 +72,7 @@ const CreateCabinForm = () => {
         <Input
           type="number"
           id="maxCapacity"
-          disabled={isCreating}
+          disabled={isWorking}
           {...register("maxCapacity", {
             required: "This field is required",
             min: {
@@ -82,7 +91,7 @@ const CreateCabinForm = () => {
         <Input
           type="number"
           id="regularPrice"
-          disabled={isCreating}
+          disabled={isWorking}
           {...register("regularPrice", {
             required: "This field is required",
             min: {
@@ -98,7 +107,7 @@ const CreateCabinForm = () => {
           type="number"
           id="discount"
           defaultValue={0}
-          disabled={isCreating}
+          disabled={isWorking}
           {...register("discount", {
             required: "This field is required",
             validate: (value) =>
@@ -116,7 +125,7 @@ const CreateCabinForm = () => {
         <Textarea
           type="number"
           id="description"
-          disabled={isCreating}
+          disabled={isWorking}
           defaultValue=""
           {...register("description", {
             required: "This field is required",
@@ -129,7 +138,8 @@ const CreateCabinForm = () => {
           id="image"
           accept="image/*"
           {...register("image", {
-            required: "This field is required",
+            // во время редактирования фото не нужно
+            required: isEditSession ? false : "This field is required",
           })}
         />
       </FormRow>
@@ -138,7 +148,7 @@ const CreateCabinForm = () => {
         <Button variation="secondary" type="reset">
           Cancel
         </Button>
-        <Button>Create new cabin</Button>
+        <Button>{isEditSession ? "Edit cabin" : "Add cabin"}</Button>
       </FormRow>
     </Form>
   );
