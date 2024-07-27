@@ -9,7 +9,7 @@ import { useForm } from "react-hook-form";
 import { useCreateCabin } from "./useCreateCabin";
 import { useEditCabin } from "./useEditCabin";
 
-const CreateCabinForm = ({ cabinToEdit = {} }) => {
+const CreateCabinForm = ({ cabinToEdit = {}, onCloseModal }) => {
   // Добавление нового элемента
   const { isCreating, createCabin } = useCreateCabin();
   // Редактирование элемента
@@ -33,7 +33,10 @@ const CreateCabinForm = ({ cabinToEdit = {} }) => {
       editCabin(
         { newCabinData: { ...data, image }, id: editId },
         {
-          onSuccess: (data) => reset(),
+          onSuccess: (data) => {
+            reset();
+            onCloseModal?.();
+          },
         }
       );
     // проследи чтоб названия данных из инпутов совпадали с переменными в БЕ
@@ -41,7 +44,10 @@ const CreateCabinForm = ({ cabinToEdit = {} }) => {
       createCabin(
         { ...data, image: data.image[0] },
         {
-          onSuccess: (data) => reset(),
+          onSuccess: (data) => {
+            reset();
+            onCloseModal?.();
+          },
         }
       );
   };
@@ -52,7 +58,10 @@ const CreateCabinForm = ({ cabinToEdit = {} }) => {
 
   return (
     // Если введенные данные не удовлетворяют тем настройкам которые мы задали в {...register} то срабатывает функция onError
-    <Form onSubmit={handleSubmit(onSubmit, onError)}>
+    <Form
+      onSubmit={handleSubmit(onSubmit, onError)}
+      type={onCloseModal ? "modal" : "regular"}
+    >
       <FormRow label="Cabin name" error={errors?.name?.message} id="name">
         <Input
           type="text"
@@ -145,7 +154,12 @@ const CreateCabinForm = ({ cabinToEdit = {} }) => {
       </FormRow>
 
       <FormRow>
-        <Button variation="secondary" type="reset">
+        {/* ?.() - вызов ф-ции только если она существует */}
+        <Button
+          variation="secondary"
+          type="reset"
+          onClick={() => onCloseModal?.()}
+        >
           Cancel
         </Button>
         <Button>{isEditSession ? "Edit cabin" : "Add cabin"}</Button>
