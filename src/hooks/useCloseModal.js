@@ -3,8 +3,6 @@ import { useEffect, useRef } from "react";
 export function useOutsideClickModal(close) {
   const ref = useRef();
 
-  console.log(ref);
-
   useEffect(() => {
     const handleClick = (e) => {
       if (ref.current && !ref.current.contains(e.target)) {
