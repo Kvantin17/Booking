@@ -17,17 +17,18 @@ export function useBookings() {
   const [field, direction] = sortByRaw.split("-");
   const sortBy = { field, direction };
 
+  //Пагинация
+  const page = !searchParams.get("page") ? 1 : Number(searchParams.get("page"));
+
   const {
     isLoading,
-    data: bookings,
+    data: { data: bookings, count } = {},
     error,
   } = useQuery({
     // вставив сюда filter и sortBy мы сообщаем React Query сделать новый заброс, так как он будет под новым именем, React Query будет хранить в кеше все варианты фильтра и сортировки
-    queryKey: ["bookings", filter, sortBy],
-    queryFn: () => getBookings({ filter, sortBy }),
+    queryKey: ["bookings", filter, sortBy, page],
+    queryFn: () => getBookings({ filter, sortBy, page }),
   });
 
-  console.log(bookings);
-
-  return { isLoading, error, bookings };
+  return { isLoading, error, bookings, count };
 }
