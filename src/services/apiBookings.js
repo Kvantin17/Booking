@@ -1,4 +1,5 @@
 import { PAGE_SIZE } from "../utils/constants";
+import { getToday } from "../utils/helpers";
 import supabase from "./supabase";
 
 export async function getBookings({ filter, sortBy, page }) {
@@ -71,6 +72,39 @@ export async function deleteBooking(id) {
   if (error) {
     console.error(error);
     throw new Error("Booking could not be deleted");
+  }
+
+  return data;
+}
+
+// Возвращает все BOOKINGS, созданные после указанной даты. Нужно для получения бронирований, созданных за последние 30 дней.
+// date должна быть ISOStrings
+export async function getBookingsAfterDate(date) {
+  const { data, error } = await supabase
+    .from("bookings")
+    .select("created_at, totalPrice, extrasPrice")
+    .gte("created_at", date)
+    .lte("created_at", getToday({ end: true }));
+
+  if (error) {
+    console.error(error);
+    throw new Error("Bookings could not get loaded");
+  }
+
+  return data;
+}
+
+// Возвращает все STAYS, созданные после указанной даты
+export async function getStaysAfterDate(date) {
+  const { data, error } = await supabase
+    .from("bookings")
+    .select("*, guests(fullName)")
+    .gte("startDate", date)
+    .lte("startDate", getToday());
+
+  if (error) {
+    console.error(error);
+    throw new Error("Bookings could not get loaded");
   }
 
   return data;
