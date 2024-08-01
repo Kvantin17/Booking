@@ -1,7 +1,6 @@
 import styled from "styled-components";
 import DashboardBox from "./DashboardBox";
 import Heading from "../../ui/Heading";
-import { useDarkMode } from "../../context/DarkModeContext";
 import {
   Area,
   AreaChart,
@@ -9,8 +8,11 @@ import {
   ResponsiveContainer,
   Tooltip,
   XAxis,
+  YAxis,
 } from "recharts";
+import { useDarkMode } from "../../context/DarkModeContext";
 import { eachDayOfInterval, format, isSameDay, subDays } from "date-fns";
+
 const StyledSalesChart = styled(DashboardBox)`
   grid-column: 1 / -1;
 
@@ -20,7 +22,7 @@ const StyledSalesChart = styled(DashboardBox)`
   }
 `;
 
-const SalesChart = ({ bookings, numDays }) => {
+function SalesChart({ bookings, numDays }) {
   const { isDarkMode } = useDarkMode();
 
   const allDates = eachDayOfInterval({
@@ -57,13 +59,19 @@ const SalesChart = ({ bookings, numDays }) => {
   return (
     <StyledSalesChart>
       <Heading as="h2">
-        Sales from {format(allDates.at(0), "MM dd yyyy")} &mdash;{" "}
-        {format(allDates.at(-1), "MM dd yyyy")}
+        Sales from {format(allDates.at(0), "MMM dd yyyy")} &mdash;{" "}
+        {format(allDates.at(-1), "MMM dd yyyy")}{" "}
       </Heading>
+
       <ResponsiveContainer height={300} width="100%">
-        <AreaChart data={data} height={300} width={700}>
+        <AreaChart data={data}>
           <XAxis
             dataKey="label"
+            tick={{ fill: colors.text }}
+            tickLine={{ stroke: colors.text }}
+          />
+          <YAxis
+            unit="$"
             tick={{ fill: colors.text }}
             tickLine={{ stroke: colors.text }}
           />
@@ -84,22 +92,13 @@ const SalesChart = ({ bookings, numDays }) => {
             stroke={colors.extrasSales.stroke}
             fill={colors.extrasSales.fill}
             strokeWidth={2}
-            name="Extras Sales"
-            unit="$"
-          />
-          <Area
-            dataKey="totalSales"
-            type="monotone"
-            stroke={colors.totalSales.stroke}
-            fill={colors.totalSales.fill}
-            strokeWidth={2}
-            name="Total sales"
+            name="Extras sales"
             unit="$"
           />
         </AreaChart>
       </ResponsiveContainer>
     </StyledSalesChart>
   );
-};
+}
 
 export default SalesChart;
