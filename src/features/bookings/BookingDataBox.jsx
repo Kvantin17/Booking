@@ -97,7 +97,6 @@ const Footer = styled.footer`
 `;
 
 function BookingDataBox({ booking }) {
-  console.log(booking);
   const {
     created_at,
     startDate,

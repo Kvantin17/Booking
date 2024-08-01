@@ -60,8 +60,6 @@ const CabinTable = () => {
           <div></div>
         </TableHeader>
 
-        {console.log(cabins)}
-
         <Table.Body
           data={sortedCabins}
           render={(cabin) => <CabinRow cabin={cabin} key={cabin.id} />}
