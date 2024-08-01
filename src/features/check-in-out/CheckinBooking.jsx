@@ -62,7 +62,7 @@ function CheckinBooking() {
         },
       });
     } else {
-      checkin(bookingId);
+      checkin({ bookingId });
     }
   };
 
