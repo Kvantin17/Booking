@@ -37,7 +37,7 @@ const ProtectedRoute = ({ children }) => {
 
   if (isAuthenticated) return children;
 
-  return { children };
+  return null;
 };
 
 export default ProtectedRoute;
